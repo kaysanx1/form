@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pemesanan Menu Ayam & Lele</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #ffffff);
+      padding: 20px;
+    }
+    .container {
+      max-width: 720px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.06);
+    }
+    h2.typing {
+      width: fit-content;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 3px solid #4CAF50;
+      animation: typing 6s steps(40, end) infinite, blink .75s step-end infinite;
+      font-size: 24px;
+      color: #2c3e50;
+      margin: 0 auto 30px;
+    }
+    @keyframes typing {
+      0% { width: 0 }
+      50% { width: 100% }
+      100% { width: 0 }
+    }
+    @keyframes blink {
+      from, to { border-color: transparent }
+      50% { border-color: #4CAF50; }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+    input, select {
+      padding: 10px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .item-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .qty-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .qty-group button {
+      padding: 6px 10px;
+    }
+    .qty-group span {
+      min-width: 20px;
+      text-align: center;
+      display: inline-block;
+    }
+    #total {
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+      margin: 20px 0;
+      color: #2c3e50;
+    }
+    .add-btn {
+      background: #eee;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button[type="submit"] {
+      background: #25D366;
+      color: white;
+      padding: 14px;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      h2.typing {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="typing">Silakan pilih pesanan Anda...</h2>
+    <form id="orderForm">
+      <div class="form-group">
+        <label>Nama Pembeli</label>
+        <input type="text" id="nama" required />
+      </div>
+
+      <div class="form-group">
+        <label>🍗 Menu Utama</label>
+        <div id="menuContainer"></div>
+        <button type="button" class="add-btn" onclick="addItem('menu')">+ Tambah Menu</button>
+      </div>
+
+      <div class="form-group">
+        <label>➕ Extra Menu</label>
+        <div id="extraContainer"></div>
+        <button type="button" class="add-btn" onclick="addItem('extra')">+ Tambah Extra</button>
+      </div>
+
+      <div class="form-group">
+        <label>🌶️ Variasi Sambal</label>
+        <select id="sambal">
+          <option value="">Pilih sambal</option>
+          <option value="Sambal Merah">Sambal Merah</option>
+          <option value="Sambal Ijo">Sambal Ijo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>🧃 Minuman</label>
+        <div id="drinkContainer"></div>
+        <button type="button" class="add-btn" onclick="addItem('drink')">+ Tambah Minuman</button>
+      </div>
+
+      <div id="total">Total: Rp 0</div>
+      <button type="submit">Kirim ke WhatsApp</button>
+    </form>
+  </div>
+
+  <script>
+    const hargaMenu = {
+      "Pecel Ayam Paha Atas": 16000,
+      "Pecel Ayam Sayap": 16000,
+      "Pecel Ayam Dada": 18000,
+      "Pecel Ayam Paha Bawah": 18000,
+      "Pecel Lele": 18000
+    };
+
+    const hargaExtra = {
+      "Tahu Tempe": 5000,
+      "Sate Ati Ampela": 5000,
+      "Sate Usus": 5000,
+      "Sate Kulit": 5000,
+      "Kol Goreng": 3000,
+      "Extra Nasi": 5000
+    };
+
+    const hargaMinum = {
+      "Es Teh Manis (Free 7 Hari)": 3000,
+      "Es Jeruk": 5000
+    };
+
+    function addItem(type) {
+      const container = {
+        'menu': document.getElementById('menuContainer'),
+        'extra': document.getElementById('extraContainer'),
+        'drink': document.getElementById('drinkContainer')
+      }[type];
+
+      const hargaMap = { menu: hargaMenu, extra: hargaExtra, drink: hargaMinum }[type];
+
+      const row = document.createElement('div');
+      row.className = 'item-row';
+
+      const select = document.createElement('select');
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = 'Pilih ' + type;
+      select.appendChild(defaultOpt);
+
+      for (let item in hargaMap) {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = `${item} - Rp ${hargaMap[item].toLocaleString('id-ID')}`;
+        select.appendChild(opt);
+      }
+
+      const qtyGroup = document.createElement('div');
+      qtyGroup.className = 'qty-group';
+
+      const btnMin = document.createElement('button');
+      btnMin.type = 'button';
+      btnMin.textContent = '-';
+
+      const btnPlus = document.createElement('button');
+      btnPlus.type = 'button';
+      btnPlus.textContent = '+';
+
+      const spanQty = document.createElement('span');
+      spanQty.textContent = '1';
+
+      btnMin.onclick = () => {
+        let qty = parseInt(spanQty.textContent);
+        if (qty > 1) spanQty.textContent = qty - 1;
+        updateTotal();
+      };
+      btnPlus.onclick = () => {
+        let qty = parseInt(spanQty.textContent);
+        spanQty.textContent = qty + 1;
+        updateTotal();
+      };
+
+      select.onchange = updateTotal;
+
+      qtyGroup.appendChild(btnMin);
+      qtyGroup.appendChild(spanQty);
+      qtyGroup.appendChild(btnPlus);
+
+      row.appendChild(select);
+      row.appendChild(qtyGroup);
+      container.appendChild(row);
+      updateTotal();
+    }
+
+    function updateTotal() {
+      let total = 0;
+
+      document.querySelectorAll('#menuContainer .item-row').forEach(row => {
+        const item = row.querySelector('select').value;
+        const qty = parseInt(row.querySelector('span').textContent);
+        if (hargaMenu[item]) total += hargaMenu[item] * qty;
+      });
+
+      document.querySelectorAll('#extraContainer .item-row').forEach(row => {
+        const item = row.querySelector('select').value;
+        const qty = parseInt(row.querySelector('span').textContent);
+        if (hargaExtra[item]) total += hargaExtra[item] * qty;
+      });
+
+      document.querySelectorAll('#drinkContainer .item-row').forEach(row => {
+        const item = row.querySelector('select').value;
+        const qty = parseInt(row.querySelector('span').textContent);
+        if (hargaMinum[item]) total += hargaMinum[item] * qty;
+      });
+
+      document.getElementById('total').textContent = `Total: Rp ${total.toLocaleString('id-ID')}`;
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nama = document.getElementById('nama').value;
+      let pesan = `📦 PESANAN MASUK\nNama: ${nama}\n`;
+
+      document.querySelectorAll('#menuContainer .item-row').forEach(row => {
+        const item = row.querySelector('select').value;
+        const qty = row.querySelector('span').textContent;
+        if (item) pesan += `🍗 ${item} x${qty}\n`;
+      });
+
+      document.querySelectorAll('#extraContainer .item-row').forEach(row => {
+        const item = row.querySelector('select').value;
+        const qty = row.querySelector('span').textContent;
+        if (item) pesan += `➕ ${item} x${qty}\n`;
+      });
+
+      document.querySelectorAll('#drinkContainer .item-row').forEach(row => {
+        const item = row.querySelector('select').value;
+        const qty = row.querySelector('span').textContent;
+        if (item) pesan += `🧃 ${item} x${qty}\n`;
+      });
+
+      const sambal = document.getElementById('sambal').value;
+      if (sambal) pesan += `🌶️ Sambal: ${sambal}\n`;
+
+      pesan += `${document.getElementById('total').textContent}`;
+
+      const encoded = encodeURIComponent(pesan);
+      const phone = '6285718404588'; // ← Ganti ke nomor WA penjual
+      window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+    });
+
+    window.onload = () => {
+      addItem('menu');
+      addItem('drink');
+    };
+  </script>
+</body>
+</html>
